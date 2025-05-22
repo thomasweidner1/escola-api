@@ -3,7 +3,7 @@ name = "escola-api"
 version = "0.1.0"
 description = ""
 authors = [
-    {name = "Lucas Weidner",email = "lucasmweidner@gmail.comr"}
+    {name = "Thomas Johannes David Weidner",email = "thomas.jdweidner@gmail.com"}
 ]
 readme = "README.md"
 requires-python = ">=3.13"
