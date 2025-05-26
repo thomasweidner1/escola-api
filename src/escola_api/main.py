@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 import uvicorn
 from fastapi import FastAPI, HTTPException
+from rich_toolkit import form
 
 app = FastAPI()
 
@@ -101,6 +102,75 @@ def editar_curso(id: int, form: CursoEditar):
             return curso
 
     raise HTTPException(status_code=404, detail=f"Curso não encontrado com id: {id}")
+
+@dataclass
+class Aluno:
+    id: int = field()
+    nome: str = field()
+    sobrenome: str = field()
+    cpf: str = field()
+    data_nascimento: str = field()
+
+@dataclass
+class AlunoCadastro:
+    nome: str = field()
+    sobrenome: str = field()
+    cpf: str = field()
+    data_nascimento: str = field()
+
+@dataclass
+class AlunoEditar:
+    nome: str = field()
+    sobrenome: str = field()
+    cpf: str = field()
+    data_nascimento: str = field()
+
+alunos = [
+    Aluno(id = 1, nome = "Thomas", sobrenome = "Weidner", cpf="123.456.789-10" ,data_nascimento="29/06/2000"),
+    Aluno(id = 2, nome = "João", sobrenome = "da Silva", cpf="100.001.202-10", data_nascimento="12/05/1998"),
+]
+
+@app.get("/api/alunos")
+def obter_todos_alunos():
+    return alunos
+
+@app.get("/api/alunos/{id}")
+def obter_aluno(id: int):
+    aluno_selecionado = [aluno for aluno in alunos if aluno.id == id]
+    if not aluno_selecionado:
+        raise HTTPException(status_code=404, detail=f"Aluno não encontrado com id: {id}")
+    return aluno_selecionado[0]
+#    for aluno in alunos:
+#        if aluno.id == id:
+#           return aluno
+
+@app.post("/api/alunos")
+def cadastrar_aluno(form: AlunoCadastro):
+    ultimo_id = max([aluno.id for aluno in alunos], default=0)
+    aluno = Aluno(id = ultimo_id + 1, nome = form.nome, sobrenome = form.sobrenome, cpf = form.cpf, data_nascimento = form.data_nascimento)
+    alunos.append(aluno)
+    return aluno
+
+@app.put("/api/alunos/{id}")
+def editar_aluno(id: int, form: AlunoEditar):
+    aluno_selecionado = [aluno for aluno in alunos if aluno.id == id]
+    if aluno_selecionado[0]:
+        aluno_selecionado[0].nome = form.nome
+        aluno_selecionado[0].sobrenome = form.sobrenome
+        aluno_selecionado[0].cpf = form.cpf
+        aluno_selecionado[0].data_nascimento = form.data_nascimento
+        return aluno_selecionado
+    raise HTTPException(status_code=404, detail=f"Aluno não encontrado com id: {id}")
+
+@app.delete("/api/alunos/{id}")
+def apagar_aluno(id: int):
+    aluno_selecionado = [aluno for aluno in alunos if aluno.id == id]
+    if aluno_selecionado:
+        alunos.remove(aluno_selecionado[0])
+    raise HTTPException(status_code=404, detail=f"Aluno não encontrado com id: {id}")
+
+
+
 
 if __name__ == "__main__":
     uvicorn.run("main:app")
