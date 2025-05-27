@@ -137,12 +137,18 @@ class Aluno(BaseModel):
     cpf: str = Field()
     data_nascimento: datetime = Field(alias="dataNascimento")
 
+    class Config:
+        populate_by_name = True
+        allow_population_by_field_name = True
+
 
 class AlunoCadastro(BaseModel):
     nome: str = Field()
     sobrenome: str = Field()
     cpf: str = Field()
     data_nascimento: datetime = Field(alias="dataNascimento")
+    class Config:
+        allow_population_by_field_name = True
 
 
 class AlunoEditar(BaseModel):
@@ -150,6 +156,8 @@ class AlunoEditar(BaseModel):
     sobrenome: str = Field()
     cpf: str = Field()
     data_nascimento: datetime = Field(alias="dataNascimento")
+    class Config:
+        allow_population_by_field_name = True
 
 
 alunos = [
