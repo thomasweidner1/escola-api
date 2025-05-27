@@ -1,16 +1,33 @@
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, date
 import uvicorn
+from dataclasses_json import dataclass_json, LetterCase
 from fastapi import FastAPI, HTTPException
 from rich_toolkit import form
+from starlette.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, Field
 
 app = FastAPI()
+
+origins = [
+    "http://localhost:4200"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
+
 
 @app.get("/")
 def index():
     return {"mensagem: Olá mundo"}
 
-#localhost:8000/calculadora?numero1=20&numero2=40
+
+# localhost:8000/calculadora?numero1=20&numero2=40
 @app.get("/calculadora")
 def calculadora(numero1: int, numero2: int):
     soma = numero1 + numero2
@@ -18,7 +35,7 @@ def calculadora(numero1: int, numero2: int):
 
 
 @app.get("/processar-cliente")
-def processar_dados_cliente(nome:str, idade:int, sobrenome:str):
+def processar_dados_cliente(nome: str, idade: int, sobrenome: str):
     nome_completo = nome + "" + sobrenome
     ano_nascimento = datetime.now().year - idade
 
@@ -26,11 +43,10 @@ def processar_dados_cliente(nome:str, idade:int, sobrenome:str):
         decada = "decada de 90"
     elif ano_nascimento >= 1980 and ano_nascimento < 1990:
         decada = "decada de 80"
-    elif ano_nascimento >= 1970 and ano_nascimento <1980:
+    elif ano_nascimento >= 1970 and ano_nascimento < 1980:
         decada = "decada de 70"
     else:
         decada = "decada abaixo de 70 ou acima de 90"
-
 
     return {
         "nomeCompleto": nome_completo,
@@ -38,32 +54,39 @@ def processar_dados_cliente(nome:str, idade:int, sobrenome:str):
         "decada": decada,
     }
 
+
 @dataclass
 class Curso:
     id: int = field()
     nome: str = field()
     sigla: str = field()
 
+
 @dataclass
 class CursoCadastro:
     nome: str = field()
     sigla: str = field()
+
 
 @dataclass
 class CursoEditar:
     nome: str = field()
     sigla: str = field()
 
+
 cursos = [
     # instanciando um objeto da classe Curso
-    Curso(id = 1, nome = "Python Web", sigla="PY1"),
-    Curso(id = 2, nome="Git e Github", sigla="GT")
+    Curso(id=1, nome="Python Web", sigla="PY1"),
+    Curso(id=2, nome="Git e Github", sigla="GT")
 ]
+
+
 # /docs para abrir o swagger
 
 @app.get("/api/cursos")
 def listar_todos_cursos():
     return cursos
+
 
 @app.get("/api/cursos/{id}")
 def obter_por_id_curso(id: int):
@@ -73,16 +96,18 @@ def obter_por_id_curso(id: int):
     # Lançando uma exceção com o status code de 404 not found
     raise HTTPException(status_code=404, detail=f"Curso não encontrado com id: {id}")
 
+
 @app.post("/api/cursos")
 def cadastrar_curso(form: CursoCadastro):
     ultimo_id = max([curso.id for curso in cursos], default=0)
 
     # instanciar um objeto da classe Curso
-    curso = Curso(id = ultimo_id + 1, nome=form.nome, sigla=form.sigla)
+    curso = Curso(id=ultimo_id + 1, nome=form.nome, sigla=form.sigla)
 
     cursos.append(curso)
 
     return curso
+
 
 @app.delete("/api/cursos/{id}")
 def apagar_curso(id: int):
@@ -92,6 +117,7 @@ def apagar_curso(id: int):
             return
 
     raise HTTPException(status_code=404, detail=f"Curso não encontrado com id: {id}")
+
 
 @app.put("/api/cursos/{id}")
 def editar_curso(id: int, form: CursoEditar):
@@ -103,36 +129,39 @@ def editar_curso(id: int, form: CursoEditar):
 
     raise HTTPException(status_code=404, detail=f"Curso não encontrado com id: {id}")
 
-@dataclass
-class Aluno:
-    id: int = field()
-    nome: str = field()
-    sobrenome: str = field()
-    cpf: str = field()
-    data_nascimento: str = field()
 
-@dataclass
-class AlunoCadastro:
-    nome: str = field()
-    sobrenome: str = field()
-    cpf: str = field()
-    data_nascimento: str = field()
+class Aluno(BaseModel):
+    id: int = Field()
+    nome: str = Field()
+    sobrenome: str = Field()
+    cpf: str = Field()
+    data_nascimento: datetime = Field(alias="dataNascimento")
 
-@dataclass
-class AlunoEditar:
-    nome: str = field()
-    sobrenome: str = field()
-    cpf: str = field()
-    data_nascimento: str = field()
+
+class AlunoCadastro(BaseModel):
+    nome: str = Field()
+    sobrenome: str = Field()
+    cpf: str = Field()
+    data_nascimento: datetime = Field(alias="dataNascimento")
+
+
+class AlunoEditar(BaseModel):
+    nome: str = Field()
+    sobrenome: str = Field()
+    cpf: str = Field()
+    data_nascimento: datetime = Field(alias="dataNascimento")
+
 
 alunos = [
-    Aluno(id = 1, nome = "Thomas", sobrenome = "Weidner", cpf="123.456.789-10" ,data_nascimento="29/06/2000"),
-    Aluno(id = 2, nome = "João", sobrenome = "da Silva", cpf="100.001.202-10", data_nascimento="12/05/1998"),
+    Aluno(id=1, nome="Thomas", sobrenome="Weidner", cpf="123.456.789-10", dataNascimento=date(2000, 6, 29)),
+    Aluno(id=2, nome="João", sobrenome="da Silva", cpf="100.001.202-10", dataNascimento=date(2000, 6, 29))
 ]
+
 
 @app.get("/api/alunos")
 def obter_todos_alunos():
     return alunos
+
 
 @app.get("/api/alunos/{id}")
 def obter_aluno(id: int):
@@ -140,6 +169,8 @@ def obter_aluno(id: int):
     if not aluno_selecionado:
         raise HTTPException(status_code=404, detail=f"Aluno não encontrado com id: {id}")
     return aluno_selecionado[0]
+
+
 #    for aluno in alunos:
 #        if aluno.id == id:
 #           return aluno
@@ -147,9 +178,11 @@ def obter_aluno(id: int):
 @app.post("/api/alunos")
 def cadastrar_aluno(form: AlunoCadastro):
     ultimo_id = max([aluno.id for aluno in alunos], default=0)
-    aluno = Aluno(id = ultimo_id + 1, nome = form.nome, sobrenome = form.sobrenome, cpf = form.cpf, data_nascimento = form.data_nascimento)
+    aluno = Aluno(id=ultimo_id + 1, nome=form.nome, sobrenome=form.sobrenome, cpf=form.cpf,
+                  data_nascimento=form.data_nascimento)
     alunos.append(aluno)
     return aluno
+
 
 @app.put("/api/alunos/{id}")
 def editar_aluno(id: int, form: AlunoEditar):
@@ -162,14 +195,14 @@ def editar_aluno(id: int, form: AlunoEditar):
         return aluno_selecionado
     raise HTTPException(status_code=404, detail=f"Aluno não encontrado com id: {id}")
 
+
 @app.delete("/api/alunos/{id}")
 def apagar_aluno(id: int):
     aluno_selecionado = [aluno for aluno in alunos if aluno.id == id]
     if aluno_selecionado:
         alunos.remove(aluno_selecionado[0])
+        return
     raise HTTPException(status_code=404, detail=f"Aluno não encontrado com id: {id}")
-
-
 
 
 if __name__ == "__main__":
