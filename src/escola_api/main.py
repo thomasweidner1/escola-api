@@ -1,11 +1,9 @@
-from dataclasses import dataclass, field
 from datetime import datetime, date
 import uvicorn
-from dataclasses_json import dataclass_json, LetterCase
 from fastapi import FastAPI, HTTPException
-from rich_toolkit import form
 from starlette.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
+from typing_extensions import Optional
 
 app = FastAPI()
 
@@ -55,23 +53,23 @@ def processar_dados_cliente(nome: str, idade: int, sobrenome: str):
     }
 
 
-@dataclass
-class Curso:
-    id: int = field()
-    nome: str = field()
-    sigla: str = field()
+
+class Curso(BaseModel):
+    id: int = Field()
+    nome: str = Field()
+    sigla: Optional[str] = Field(default=None)
 
 
-@dataclass
-class CursoCadastro:
-    nome: str = field()
-    sigla: str = field()
+
+class CursoCadastro(BaseModel):
+    nome: str = Field()
+    sigla: Optional[str] = Field(default=None)
 
 
-@dataclass
-class CursoEditar:
-    nome: str = field()
-    sigla: str = field()
+
+class CursoEditar(BaseModel):
+    nome: str = Field()
+    sigla: Optional[str] = Field(default=None)
 
 
 cursos = [
@@ -161,8 +159,8 @@ class AlunoEditar(BaseModel):
 
 
 alunos = [
-    Aluno(id=1, nome="Thomas", sobrenome="Weidner", cpf="123.456.789-10", dataNascimento=date(2000, 6, 29)),
-    Aluno(id=2, nome="João", sobrenome="da Silva", cpf="100.001.202-10", dataNascimento=date(2000, 6, 29))
+    Aluno(id=1, nome="Thomas", sobrenome="Weidner", cpf="123.456.789-10", data_nascimento=date(2000, 6, 29)),
+    Aluno(id=2, nome="João", sobrenome="da Silva", cpf="100.001.202-10", data_nascimento=date(2000, 6, 29))
 ]
 
 
