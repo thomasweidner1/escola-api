@@ -318,7 +318,77 @@ def deletar_professor(id: int):
     if professor_selecionado[0]:
         professores.remove(professor_selecionado[0])
         return
-    raise HTTPException(status_code=404, detail=f"Aluno não encontrado com id: {id}")
+    raise HTTPException(status_code=404, detail=f"Professor não encontrado com id: {id}")
+
+###########################formações########################################
+
+class Formacao(BaseModel):
+    id: int = Field()
+    nome: str = Field()
+    descricao: str = Field()
+    duracao: date = Field()
+
+    class Config:
+        allow_population_by_field_name = True
+        populate_by_name = True
+
+class FormacaoCadastro(BaseModel):
+    nome: str = Field()
+    descricao: str = Field()
+    duracao: date = Field()
+
+
+class Config:
+        allow_population_by_field_name = True
+
+class FormacaoEditar(BaseModel):
+    nome: str = Field()
+    descricao: str = Field()
+    duracao: date = Field()
+
+    class Config:
+        allow_population_by_field_name = True
+
+formacoes = []
+
+@app.get("/api/formacoes")
+def obter_formacoes():
+    return formacoes
+
+@app.get("/api/formacoes/{id}")
+def obter_formacoes(id: int):
+    formacao_selecionado = [formacao for formacao in formacoes if formacao.id == id]
+    return formacao_selecionado[0]
+
+@app.post("/api/formacoes")
+def cadastrar_formacao(form: FormacaoCadastro):
+    ultimo_id = max([formacao.id for formacao in formacoes], default=0)
+    formacao = Formacao(
+        id=ultimo_id + 1,
+        nome=form.nome,
+        descricao=form.descricao,
+        duracao=form.duracao)
+    formacoes.append(formacao)
+    return(formacao)
+
+@app.put("/api/formacoes/{id}")
+def editar_formacao(form: FormacaoCadastro, id: int):
+    formacao_selecionado = [formacao for formacao in formacoes if formacao.id == id]
+    if formacao_selecionado[0]:
+        formacao_selecionado[0].nome = form.nome
+        formacao_selecionado[0].descricao = form.descricao
+        formacao_selecionado[0].duracao = form.duracao
+
+        return formacao_selecionado[0]
+    raise HTTPException(status_code=404, detail=f"Formação não encontrada com id: {id}")
+
+@app.delete("/api/formacoes/{id}")
+def deletar_formacao(id: int):
+    formacao_selecionado = [formacao for formacao in formacoes if formacao.id == id]
+    if formacao_selecionado[0]:
+        formacoes.remove(formacao_selecionado[0])
+        return
+    raise HTTPException(status_code=404, detail=f"Formação não encontrada com id: {id}")
 
 
 
