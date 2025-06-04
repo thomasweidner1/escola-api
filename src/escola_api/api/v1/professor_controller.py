@@ -2,8 +2,8 @@ from datetime import date
 
 from fastapi import HTTPException
 
-from escola_api.app import router
-from escola_api.schemas.professor_schema import Professor, ProfessorCadastro
+from src.escola_api.app import router
+from src.escola_api.schemas.professor_schema import Professor, ProfessorCadastro
 
 professores = [
     Professor(

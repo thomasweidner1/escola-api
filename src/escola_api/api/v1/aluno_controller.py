@@ -1,8 +1,8 @@
 from datetime import date
 
 from fastapi import HTTPException
-from escola_api.app import router
-from escola_api.schemas.aluno_schema import AlunoEditar, AlunoCadastro, Aluno
+from src.escola_api.app import router
+from src.escola_api.schemas.aluno_schema import AlunoEditar, AlunoCadastro, Aluno
 
 alunos = [
     Aluno(id=1, nome="Thomas", sobrenome="Weidner", cpf="123.456.789-10", data_nascimento=date(2000, 6, 29)),
