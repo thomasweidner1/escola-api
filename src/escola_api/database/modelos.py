@@ -5,7 +5,7 @@ from sqlalchemy import Column, Integer, String
 from src.escola_api.database.banco_dados import Base
 
 
-class Curso(Base):
+class CursoEntidade(Base):
     # Criar tabela
     __tablename__ = "cursos"
 

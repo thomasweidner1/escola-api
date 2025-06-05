@@ -1,6 +1,10 @@
+from src.escola_api.database.banco_dados import SessionLocal
+from src.escola_api.database.modelos import CursoEntidade
 from src.escola_api.schemas.curso_schemas import Curso, CursoCadastro, CursoEditar
-from fastapi import HTTPException
 from src.escola_api.app import router
+from fastapi import HTTPException, Depends
+from sqlalchemy.orm import Session
+
 
 # /docs para abrir o swagger
 
@@ -10,9 +14,18 @@ cursos = [
     Curso(id=2, nome="Git e Github", sigla="GT")
 ]
 
+# Função de dependência para obter uma sessçao do banco de dados
+def get_db():
+    db = SessionLocal() # Cria uma nova sessão do banco de dados
+    try:
+        yield db # Retorna a sessão de forma que o FastAPI possa utilizá-la nas rotas
+    finally:
+        db.close() # Garante qeue a sessão será fechada após o uso
+
 
 @router.get("/api/cursos")
-def listar_todos_cursos():
+def listar_todos_cursos(db: Session = Depends(get_db)):
+    cursos = db.query(CursoEntidade).all()
     return cursos
 
 
