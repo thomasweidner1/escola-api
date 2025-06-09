@@ -1,57 +1,77 @@
-from datetime import date
+from fastapi import HTTPException, Depends
+from sqlalchemy.orm import Session
 
-from fastapi import HTTPException
 from src.escola_api.app import router
+from src.escola_api.database.modelos import AlunoEntidade
+from src.escola_api.dependencias import get_db
 from src.escola_api.schemas.aluno_schema import AlunoEditar, AlunoCadastro, Aluno
 
-alunos = [
-    Aluno(id=1, nome="Thomas", sobrenome="Weidner", cpf="123.456.789-10", data_nascimento=date(2000, 6, 29)),
-    Aluno(id=2, nome="João", sobrenome="da Silva", cpf="100.001.202-10", data_nascimento=date(2000, 6, 29))
-]
+
+@router.get("/api/alunos", tags=["alunos"])
+def obter_todos_alunos(db: Session = Depends(get_db)):
+    alunos = db.query(AlunoEntidade).all()
+    alunos_response = [Aluno(
+        id=aluno.id,
+        nome=aluno.nome,
+        sobrenome=aluno.sobrenome,
+        cpf=aluno.cpf,
+        data_nascimento=aluno.data_nascimento,
+    ) for aluno in alunos]
+    return alunos_response
 
 
-@router.get("/api/alunos")
-def obter_todos_alunos():
-    return alunos
-
-
-@router.get("/api/alunos/{id}")
-def obter_aluno(id: int):
-    aluno_selecionado = [aluno for aluno in alunos if aluno.id == id]
-    if not aluno_selecionado:
-        raise HTTPException(status_code=404, detail=f"Aluno não encontrado com id: {id}")
-    return aluno_selecionado[0]
+@router.get("/api/alunos/{id}", tags=["alunos"])
+def obter_aluno(id: int, db: Session = Depends(get_db)):
+    aluno = db.query(AlunoEntidade).filter(AlunoEntidade.id == id).first()
+    if not aluno:
+        return Aluno(
+            id=aluno.id,
+            nome=aluno.nome,
+            sobrenome=aluno.sobrenome,
+            cpf=aluno.cpf,
+            data_nascimento=aluno.data_nascimento
+        )
+    raise HTTPException(status_code=404, detail=f"Aluno não encontrado com id: {id}")
 
 
 #    for aluno in alunos:
 #        if aluno.id == id:
 #           return aluno
 
-@router.post("/api/alunos")
-def cadastrar_aluno(form: AlunoCadastro):
-    ultimo_id = max([aluno.id for aluno in alunos], default=0)
-    aluno = Aluno(id=ultimo_id + 1, nome=form.nome, sobrenome=form.sobrenome, cpf=form.cpf,
-                  data_nascimento=form.data_nascimento)
-    alunos.append(aluno)
+@router.post("/api/alunos", tags=["alunos"])
+def cadastrar_aluno(form: AlunoCadastro, db: Session = Depends(get_db)):
+    aluno = AlunoEntidade(
+        nome=form.nome,
+        sobrenome=form.sobrenome,
+        cpf=form.cpf,
+        data_nascimento=form.data_nascimento
+    )
+
+    db.add(aluno)
+    db.commit()
+    db.refresh(aluno)
     return aluno
 
 
-@router.put("/api/alunos/{id}")
-def editar_aluno(id: int, form: AlunoEditar):
-    aluno_selecionado = [aluno for aluno in alunos if aluno.id == id]
-    if aluno_selecionado[0]:
-        aluno_selecionado[0].nome = form.nome
-        aluno_selecionado[0].sobrenome = form.sobrenome
-        aluno_selecionado[0].cpf = form.cpf
-        aluno_selecionado[0].data_nascimento = form.data_nascimento
-        return aluno_selecionado
+@router.put("/api/alunos/{id}", tags=["alunos"])
+def editar_aluno(id: int, form: AlunoEditar, db: Session = Depends(get_db)):
+    aluno = db.query(AlunoEntidade).filter(AlunoEntidade.id == id).first()
+    if aluno:
+        aluno.nome = form.nome
+        aluno.sobrenome = form.sobrenome
+        aluno.cpf = form.cpf
+        aluno.data_nascimento = form.data_nascimento
+        db.commit()
+        db.refresh(aluno)
+        return aluno
     raise HTTPException(status_code=404, detail=f"Aluno não encontrado com id: {id}")
 
 
-@router.delete("/api/alunos/{id}")
-def apagar_aluno(id: int):
-    aluno_selecionado = [aluno for aluno in alunos if aluno.id == id]
-    if aluno_selecionado:
-        alunos.remove(aluno_selecionado[0])
+@router.delete("/api/alunos/{id}", tags=["alunos"])
+def apagar_aluno(id: int, db: Session = Depends(get_db)):
+    aluno = db.query(AlunoEntidade).filter(AlunoEntidade.id == id).first()
+    if aluno:
+        db.delete(aluno)
+        db.commit()
         return
     raise HTTPException(status_code=404, detail=f"Aluno não encontrado com id: {id}")
