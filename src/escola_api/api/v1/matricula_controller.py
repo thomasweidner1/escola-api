@@ -47,7 +47,8 @@ def editar_matricula(id: int, form: MatriculaEditar, db: Session = Depends(get_d
 
 @router.get("/api/matricula/{id}", status_code=200, tags=["matriculas"])
 def obter_por_id_matricula(id:int, db: Session = Depends(get_db)):
-    matricula = db.query(MatriculaEntidade).get(id)
+    matricula: MatriculaEntidade = db.query(MatriculaEntidade).get(id)
+
     if matricula:
         return matricula
     raise HTTPException(status_code=404, detail=f"Matricula não encontrada com id: {id}")
