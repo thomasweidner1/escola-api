@@ -1,12 +1,12 @@
 INSERT INTO `alunos` (`nome`, `sobrenome`, `cpf`, `data_nascimento`) VALUES
-  ('Ana',     'Silva',    '123.456.789-00', '1998-03-12'),
-  ('Bruno',   'Pereira',  '234.567.890-11', '2001-07-25'),
-  ('Carla',   'Almeida',  '345.678.901-22', '1995-11-30'),
   ('Diego',   'Costa',    '456.789.012-33', '2000-01-05'),
-  ('Elisa',   'Fernandes','567.890.123-44', '1999-09-17'),
-  ('Felipe',  'Lima',     '678.901.234-55', '2002-04-08'),
   ('Gabriela','Rocha',    '789.012.345-66', '1997-06-21'),
-  ('Henrique','Alves',    '890.123.456-77', '2003-12-03');
+  ('Ana',     'Silva',    '123.456.789-00', '1998-03-12'),
+  ('Henrique','Alves',    '890.123.456-77', '2003-12-03'),
+  ('Felipe',  'Lima',     '678.901.234-55', '2002-04-08'),
+  ('Bruno',   'Pereira',  '234.567.890-11', '2001-07-25'),
+  ('Elisa',   'Fernandes','567.890.123-44', '1999-09-17'),
+  ('Carla',   'Almeida',  '345.678.901-22', '1995-11-30');
 
 INSERT INTO `cursos` (`nome`, `sigla`) VALUES
   ('Python para Iniciantes',            'PYT'),
